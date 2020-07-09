@@ -21,6 +21,7 @@ import net.minecraft.item.SpawnEggItem
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.network.PacketBuffer
 import net.minecraft.util.ActionResult
+import net.minecraft.util.ActionResultType
 import net.minecraft.util.Hand
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
@@ -158,37 +159,33 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
     }
 
     override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
-        if (handIn == Hand.MAIN_HAND)
-            if (!worldIn.isRemote) {
-                if (playerIn.func_225608_bj_())/* Is Sneaking */ {
-                    NetworkHooks.openGui(playerIn as ServerPlayerEntity, this)
-                } else {
-                    playerIn.getHeldItem(Hand.MAIN_HAND)
-                            .orCreateTag
-                            .maybePut("BlockLauncher") { CompoundNBT() }
-                            .getCompound("LauncherInventory")
-                            .getList("Items", 10)
-                            .getOrNull(0)?.let {
-                                if (it is CompoundNBT) {
-                                    val stack = ItemStack.read(it)
-                                    val item = stack.item
-                                    if (item != Items.AIR && !stack.isEmpty) {
-                                        stack.shrink(1)
-                                        stack.write(it)
-                                        val vec = playerIn.positionVec
-                                        val fbe = FallingBlockEntity(worldIn, vec.x, vec.y, vec.z, (ITEM_TO_BLOCK[item] ?: error("")).defaultState)
-                                        fbe.fallTime = -100
-                                        fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
-                                        worldIn.addEntity(fbe)
-                                    }
+        if (handIn == Hand.MAIN_HAND && !worldIn.isRemote) {
+            if (playerIn.func_225608_bj_())/* Is Sneaking */ {
+                NetworkHooks.openGui(playerIn as ServerPlayerEntity, this)
+            } else {
+                playerIn.getHeldItem(Hand.MAIN_HAND)
+                        .orCreateTag
+                        .maybePut("BlockLauncher") { CompoundNBT() }
+                        .getCompound("LauncherInventory")
+                        .getList("Items", 10)
+                        .getOrNull(0)?.let {
+                            if (it is CompoundNBT) {
+                                val stack = ItemStack.read(it)
+                                val item = stack.item
+                                if (item != Items.AIR && !stack.isEmpty) {
+                                    stack.shrink(1)
+                                    stack.write(it)
+                                    val vec = playerIn.positionVec
+                                    val fbe = FallingBlockEntity(worldIn, vec.x, vec.y, vec.z, (ITEM_TO_BLOCK[item] ?: error("")).defaultState)
+                                    fbe.fallTime = -100
+                                    fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
+                                    worldIn.addEntity(fbe)
                                 }
                             }
-                }
-            } else if(!playerIn.func_225608_bj_()) {
-
-                //getInventory(playerIn).items.getOrNull(0).item.
+                        }
             }
-        return super.onItemRightClick(worldIn, playerIn, handIn)
+        }
+        return ActionResult(ActionResultType.SUCCESS, playerIn.getHeldItem(handIn))
     }
 
     fun getInventory(entity: PlayerEntity): Inventory {
