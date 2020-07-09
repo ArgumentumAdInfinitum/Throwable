@@ -15,14 +15,20 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build
+      - name: Extract Short SHA hash
+        shell: bash
+        run: echo "##[set-output name=sha;]$(echo ${GITHUB_SHA:0:7})"
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+        id: extract_ssha
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: C_${{ github.sha:0:7 }}
-          release_name: Commit ${{ github.sha:0:7 }}
+          tag_name: C_${{ steps.extract_ssha.outputs.sha }}
+          release_name: Commit ${{ steps.extract_ssha.outputs.sha }}
           draft: false
           prerelease: false
       - name: Upload Release Asset
@@ -33,5 +39,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
           asset_path: ./build/libs/fscraft-1.0-SNAPSHOT.jar
-          asset_name: fscraft-COMMIT_RELEASE-${{ github.sha:0:7 }}.jar
+          asset_name: fscraft-COMMIT_RELEASE-${{ steps.extract_ssha.outputs.sha }}.jar
           asset_content_type:  	application/java-archive
