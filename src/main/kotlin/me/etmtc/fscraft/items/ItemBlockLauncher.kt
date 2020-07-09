@@ -1,27 +1,34 @@
 package me.etmtc.fscraft.items
 
 import me.etmtc.fscraft.*
+import net.minecraft.block.BlockState
+import net.minecraft.block.Blocks
+import net.minecraft.block.CarrotBlock
+import net.minecraft.block.FallingBlock
 import net.minecraft.client.gui.screen.inventory.ContainerScreen
-import net.minecraft.entity.item.FallingBlockEntity
+import net.minecraft.entity.MoverType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.entity.player.ServerPlayerEntity
+import net.minecraft.fluid.Fluids
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.ItemStackHelper
 import net.minecraft.inventory.container.ContainerType
 import net.minecraft.inventory.container.INamedContainerProvider
 import net.minecraft.inventory.container.Slot
+import net.minecraft.item.DirectionalPlaceContext
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.network.PacketBuffer
-import net.minecraft.util.ActionResult
-import net.minecraft.util.ActionResultType
-import net.minecraft.util.Hand
-import net.minecraft.util.ResourceLocation
+import net.minecraft.state.properties.BlockStateProperties
+import net.minecraft.util.*
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec3d
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
+import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import net.minecraftforge.fml.network.IContainerFactory
 import net.minecraftforge.fml.network.NetworkHooks
@@ -57,6 +64,7 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
 
     class Container(type: ContainerType<*>?, id: Int, val playerInventory: PlayerInventory, val inventory: IInventory) : net.minecraft.inventory.container.Container(type, id) {
         val invSize = 3
+
         init {
             addSlots()
         }
@@ -122,8 +130,89 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
                     slot.onSlotChanged()
                 }
             }
-
             return itemstack
+        }
+    }
+
+    class FallingBlockEntity(world: World, x: Double, y: Double, z: Double, private var fallingBlockState: BlockState, var timeOut: Int) : net.minecraft.entity.item.FallingBlockEntity(world, x, y, z, fallingBlockState) {
+        var shouldDrop = false
+        var waitTicks = 0
+        var shouldWait = 20
+        private fun doDrop() {
+            if (world.gameRules.getBoolean(GameRules.DO_ENTITY_DROPS)) {
+                this.entityDropItem(fallingBlockState.block)
+            }
+            this.remove()
+        }
+
+        // Returns true if wants to drop.
+        fun doTick(): Boolean {
+            val isServerSide = !world.isRemote
+            if (timeOut-- == 0 && isServerSide) {
+                doDrop()
+                return false
+            }
+            if (hasGravity()) motion += Vec3d(0.0, -0.04, 0.0)
+            move(MoverType.SELF, motion)
+            if (isServerSide) {
+                // TO not DO: Concrete powder logic
+
+                if (onGround) {
+                    val block = fallingBlockState.block
+                    motion *= Vec3d(0.7, -0.5, 0.7)
+                    var pos = BlockPos(this)
+                    var blockstate = world.getBlockState(pos)
+                    if (blockstate.block !== Blocks.MOVING_PISTON) {
+                        if (FallingBlock.canFallThrough(world.getBlockState(pos.func_177977_b()))) return false
+                        val placeable = blockstate.isReplaceable(DirectionalPlaceContext(world, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP))
+                                && fallingBlockState.isValidPosition(world, pos)
+                        if (!placeable) {
+                            val up = pos.up()
+                            val newState = world.getBlockState(up)
+                            if (fallingBlockState.isValidPosition(world, up) && newState.isReplaceable(DirectionalPlaceContext(world, up, Direction.DOWN, ItemStack.EMPTY, Direction.UP))) {
+                                pos = up
+                                blockstate = newState
+                            } else return true
+                        }
+                        if (fallingBlockState.has(BlockStateProperties.WATERLOGGED) && world.getFluidState(pos).fluid === Fluids.WATER) {
+                            fallingBlockState = fallingBlockState.with(BlockStateProperties.WATERLOGGED, true)
+                        }
+                        if (world.setBlockState(pos, fallingBlockState, 3)) {
+                            this.remove()
+                            if (block is FallingBlock) {
+                                block.onEndFalling(world, pos, fallingBlockState, blockstate)
+                            }
+                            if (tileEntityData != null && fallingBlockState.hasTileEntity()) {
+                                val tileentity = world.getTileEntity(pos)
+                                if (tileentity != null) {
+                                    val compoundnbt = tileentity.write(CompoundNBT())
+                                    for (s in tileEntityData.keySet()) {
+                                        val inbt = tileEntityData[s]
+                                        if ("x" != s && "y" != s && "z" != s) {
+                                            compoundnbt.put(s, inbt!!.copy())
+                                        }
+                                    }
+                                    tileentity.read(compoundnbt)
+                                    tileentity.markDirty()
+                                }
+                            }
+                        } else return true
+                    }
+                }
+            }
+            motion *= 0.98
+            return false
+        }
+
+        override fun tick() {
+            if (doTick()) {
+                if (waitTicks++ > shouldWait) {
+                    waitTicks = 0
+                    doDrop()
+                }
+            } else {
+                waitTicks = 0
+            }
         }
     }
 
@@ -160,6 +249,7 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
             if (playerIn.func_225608_bj_())/* Is Sneaking */ {
                 NetworkHooks.openGui(playerIn as ServerPlayerEntity, this)
             } else {
+
                 playerIn.getHeldItem(Hand.MAIN_HAND)
                         .orCreateTag
                         .maybePut("BlockLauncher") { CompoundNBT() }
@@ -171,12 +261,12 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
                                     val item = stack.item
                                     if (item != Items.AIR && !stack.isEmpty) {
                                         stack.shrink(1)
-                                        if(stack.isEmpty)
+                                        if (stack.isEmpty)
                                             listTag.remove(it)
                                         else stack.write(it)
                                         val vec = playerIn.positionVec
-                                        val fbe = FallingBlockEntity(worldIn, vec.x, vec.y, vec.z, (ITEM_TO_BLOCK[item] ?: error("")).defaultState)
-                                        fbe.fallTime = -100
+                                        val fbe = FallingBlockEntity(worldIn, vec.x, vec.y + 2, vec.z, (ITEM_TO_BLOCK[item]
+                                                ?: error("")).defaultState, 200)
                                         fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
                                         worldIn.addEntity(fbe)
                                     }
