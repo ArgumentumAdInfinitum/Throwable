@@ -1,9 +1,6 @@
 package me.etmtc.fscraft.items
 
-import com.google.common.collect.ImmutableMap
 import me.etmtc.fscraft.*
-import net.minecraft.block.BlockState
-import net.minecraft.block.SandBlock
 import net.minecraft.client.gui.screen.inventory.ContainerScreen
 import net.minecraft.entity.item.FallingBlockEntity
 import net.minecraft.entity.player.PlayerEntity
@@ -17,7 +14,6 @@ import net.minecraft.inventory.container.Slot
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
 import net.minecraft.item.Items
-import net.minecraft.item.SpawnEggItem
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.network.PacketBuffer
 import net.minecraft.util.ActionResult
@@ -27,7 +23,6 @@ import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
 import net.minecraft.world.World
-import net.minecraft.world.server.ServerWorld
 import net.minecraftforge.fml.network.IContainerFactory
 import net.minecraftforge.fml.network.NetworkHooks
 
@@ -61,6 +56,7 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
     }
 
     class Container(type: ContainerType<*>?, id: Int, val playerInventory: PlayerInventory, val inventory: IInventory) : net.minecraft.inventory.container.Container(type, id) {
+        val invSize = 3
         init {
             addSlots()
         }
@@ -75,7 +71,8 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
 
         private fun addSlots() {
             val height = (6 - 4) * 18
-            repeat(3) {
+            repeat(invSize) {
+                // TODO dynamic centering
                 this.addSlot(object : Slot(inventory, it, 8 + (it + 3) * 18, (3.5 * 18).toInt()) {
                     override fun isItemValid(stack: ItemStack): Boolean {
                         // decline items that are not blocks
@@ -113,10 +110,10 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
                 val itemstack1 = slot.stack
                 itemstack = itemstack1.copy()
                 if (invSlot < 3) {
-                    if (!mergeItemStack(itemstack1, 3, inventorySlots.size, true)) {
+                    if (!mergeItemStack(itemstack1, invSize, inventorySlots.size, true)) {
                         return ItemStack.EMPTY
                     }
-                } else if (!mergeItemStack(itemstack1, 0, 3, false)) {
+                } else if (!mergeItemStack(itemstack1, 0, invSize, false)) {
                     return ItemStack.EMPTY
                 }
                 if (itemstack1.isEmpty) {
@@ -167,19 +164,22 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
                         .orCreateTag
                         .maybePut("BlockLauncher") { CompoundNBT() }
                         .getCompound("LauncherInventory")
-                        .getList("Items", 10)
-                        .getOrNull(0)?.let {
-                            if (it is CompoundNBT) {
-                                val stack = ItemStack.read(it)
-                                val item = stack.item
-                                if (item != Items.AIR && !stack.isEmpty) {
-                                    stack.shrink(1)
-                                    stack.write(it)
-                                    val vec = playerIn.positionVec
-                                    val fbe = FallingBlockEntity(worldIn, vec.x, vec.y, vec.z, (ITEM_TO_BLOCK[item] ?: error("")).defaultState)
-                                    fbe.fallTime = -100
-                                    fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
-                                    worldIn.addEntity(fbe)
+                        .getList("Items", 10).also { listTag ->
+                            listTag.firstOrNull()?.let {
+                                if (it is CompoundNBT) {
+                                    val stack = ItemStack.read(it)
+                                    val item = stack.item
+                                    if (item != Items.AIR && !stack.isEmpty) {
+                                        stack.shrink(1)
+                                        if(stack.isEmpty)
+                                            listTag.remove(it)
+                                        else stack.write(it)
+                                        val vec = playerIn.positionVec
+                                        val fbe = FallingBlockEntity(worldIn, vec.x, vec.y, vec.z, (ITEM_TO_BLOCK[item] ?: error("")).defaultState)
+                                        fbe.fallTime = -100
+                                        fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
+                                        worldIn.addEntity(fbe)
+                                    }
                                 }
                             }
                         }
