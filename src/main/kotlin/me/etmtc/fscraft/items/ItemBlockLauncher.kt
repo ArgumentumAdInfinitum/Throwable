@@ -135,7 +135,6 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
     }
 
     class FallingBlockEntity(world: World, x: Double, y: Double, z: Double, private var fallingBlockState: BlockState, var timeOut: Int) : net.minecraft.entity.item.FallingBlockEntity(world, x, y, z, fallingBlockState) {
-        var shouldDrop = false
         var waitTicks = 0
         var shouldWait = 20
         private fun doDrop() {
@@ -218,7 +217,6 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
 
     class Screen(screenContainer: Container, inv: PlayerInventory, titleIn: ITextComponent) : ContainerScreen<Container>(screenContainer, inv, titleIn) {
         init {
-            FSCraft.LOGGER.info("Scren initializted")
             ySize = 221
         }
 
