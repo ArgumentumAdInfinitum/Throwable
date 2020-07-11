@@ -1,10 +1,8 @@
-package me.etmtc.fscraft
+package me.etmtc.fscraft.impl.item.blocklauncher
 
-import net.minecraft.inventory.IInventory
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.nbt.ListNBT
-import net.minecraft.nbt.NBTTypes
 
 abstract class NBTInventoryImpl(size: Int) {
     val items: MutableList<ItemStack> = MutableList(size){ ItemStack.EMPTY }

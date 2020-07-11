@@ -1,5 +1,7 @@
 package me.etmtc.fscraft.impl
 
+import me.etmtc.fscraft.config.ConfigHolder
+import me.etmtc.fscraft.config.invoke
 import me.etmtc.fscraft.hasGravity
 import me.etmtc.fscraft.plus
 import me.etmtc.fscraft.times
@@ -18,7 +20,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.GameRules
 import net.minecraft.world.World
 
-class FSFallingBlockEntity(world: World, x: Double, y: Double, z: Double, private var fallingBlockState: BlockState, var timeOut: Int) : net.minecraft.entity.item.FallingBlockEntity(world, x, y, z, fallingBlockState) {
+class FSFallingBlockEntity(world: World, x: Double, y: Double, z: Double, private var fallingBlockState: BlockState, var timeOut: Int = ConfigHolder.COMMON.dropTicks()) : net.minecraft.entity.item.FallingBlockEntity(world, x, y, z, fallingBlockState) {
     var waitTicks = 0
     var shouldWait = 20
     private fun doDrop() {
@@ -46,7 +48,7 @@ class FSFallingBlockEntity(world: World, x: Double, y: Double, z: Double, privat
                 var pos = BlockPos(this)
                 var blockstate = world.getBlockState(pos)
                 if (blockstate.block !== Blocks.MOVING_PISTON) {
-                    if (FallingBlock.canFallThrough(world.getBlockState(pos.func_177977_b()))) return false
+                    if (FallingBlock.canFallThrough(world.getBlockState(pos.down()))) return false
                     val placeable = blockstate.isReplaceable(DirectionalPlaceContext(world, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP))
                             && fallingBlockState.isValidPosition(world, pos)
                     if (!placeable) {
@@ -88,7 +90,9 @@ class FSFallingBlockEntity(world: World, x: Double, y: Double, z: Double, privat
     }
 
     override fun tick() {
-        if (doTick()) {
+        if(!ConfigHolder.COMMON.modTick()){
+            super.tick()
+        } else if (doTick()) {
             if (waitTicks++ > shouldWait) {
                 waitTicks = 0
                 doDrop()

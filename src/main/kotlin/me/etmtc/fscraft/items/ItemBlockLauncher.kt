@@ -2,15 +2,10 @@ package me.etmtc.fscraft.items
 
 import me.etmtc.fscraft.*
 import me.etmtc.fscraft.impl.*
-import net.minecraft.block.BlockState
-import net.minecraft.block.Blocks
-import net.minecraft.block.ChestBlock
-import net.minecraft.block.FallingBlock
-import net.minecraft.entity.MoverType
+import me.etmtc.fscraft.impl.item.blocklauncher.NBTInventoryImpl
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.entity.player.ServerPlayerEntity
-import net.minecraft.fluid.Fluids
 import net.minecraft.inventory.IInventory
 import net.minecraft.inventory.ItemStackHelper
 import net.minecraft.inventory.container.ContainerType
@@ -19,13 +14,9 @@ import net.minecraft.inventory.container.Slot
 import net.minecraft.item.*
 import net.minecraft.nbt.CompoundNBT
 import net.minecraft.network.PacketBuffer
-import net.minecraft.state.properties.BlockStateProperties
 import net.minecraft.util.*
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Vec3d
 import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
-import net.minecraft.world.GameRules
 import net.minecraft.world.World
 import net.minecraftforge.fml.network.IContainerFactory
 import net.minecraftforge.fml.network.NetworkHooks
@@ -34,7 +25,7 @@ val ITEM_TO_BLOCK = Item.BLOCK_TO_ITEM.map {
     it.value to it.key
 }.toMap()
 
-object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_launcher"), INamedContainerProvider {
+object ItemBlockLauncher : Item(Properties().maxStackSize(1)), INamedContainerProvider {
     init {
 
     }
@@ -155,7 +146,7 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
 
     override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         if (handIn == Hand.MAIN_HAND && !worldIn.isRemote) {
-            if (playerIn.func_225608_bj_())/* Is Sneaking */ {
+            if (playerIn.isSneaking){
                 NetworkHooks.openGui(playerIn as ServerPlayerEntity, this)
             } else {
 
@@ -175,7 +166,7 @@ object ItemBlockLauncher : RegistryItem(Properties().maxStackSize(1), "block_lau
                                         else stack.write(it)
                                         val vec = playerIn.positionVec
                                         val fbe = FSFallingBlockEntity(worldIn, vec.x, vec.y + 1.62, vec.z, (ITEM_TO_BLOCK[item]
-                                                ?: error("")).defaultState, 200)
+                                                ?: error("")).defaultState)
                                         fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
                                         worldIn.addEntity(fbe)
                                     }

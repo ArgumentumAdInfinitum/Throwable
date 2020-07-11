@@ -6,9 +6,8 @@ import net.minecraft.inventory.container.Container
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 
-val GUI_GENERAL = ResourceLocation("fscraft", "textures/gui/container/empty_small.png")
-const val X_SLOTS = 176
-inline fun slotTier(tier: Int) = tier * 54
+val GUI_GENERAL = ResourceLocation("fscraft", "textures/gui/container/general_small.png")
+
 abstract class AbstractEmptyContainerScreen<T : Container>(screenContainer: T, inv: PlayerInventory, titleIn: ITextComponent) : ContainerScreen<T>(screenContainer, inv, titleIn) {
     override fun drawGuiContainerBackgroundLayer(partialTicks: Float, mouseX: Int, mouseY: Int) {
         minecraft!!.textureManager.bindTexture(GUI_GENERAL)
@@ -19,7 +18,7 @@ abstract class AbstractEmptyContainerScreen<T : Container>(screenContainer: T, i
 
     protected fun blitTier(tier: Int, col0: Int, row0: Int) {
         minecraft!!.textureManager.bindTexture(GUI_GENERAL)
-        val slot = 16
+        val slot = 18
         val slotX = 176
         val slotY = 0
         val row1 = row0 + slot
@@ -27,7 +26,7 @@ abstract class AbstractEmptyContainerScreen<T : Container>(screenContainer: T, i
         val col1 = col0 + slot
         val col2 = col0 + slot * 2
 
-        blit(row1, col1, slotX, slotY, slot, slot)
+        blit(col1, row1, slotX, slotY, slot, slot)
         if (tier > 0) {
             blit(col0, row1, slotX, slotY, slot, slot)
             blit(col2, row1, slotX, slotY, slot, slot)
