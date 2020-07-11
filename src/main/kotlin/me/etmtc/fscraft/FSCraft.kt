@@ -29,32 +29,13 @@ val LOGGER:Logger = LogManager.getLogger(MODID)
 @Mod(MODID)
 object FSCraft {
     init {
-        LogManager.getRootLogger().level
-        MOD_BUS.addGenericListener(::registerItems)
-        MOD_BUS.addGenericListener(::registerContainers)
-        runWhenOn(Dist.CLIENT){
-            MOD_BUS.addListener(::clientSetup)
-        }
+        Events.registerListeners()
+
         ModLoadingContext.get().apply {
             registerConfig(ModConfig.Type.SERVER, ConfigHolder.SERVER_SPEC)
             registerConfig(ModConfig.Type.CLIENT, ConfigHolder.CLIENT_SPEC)
             registerConfig(ModConfig.Type.COMMON, ConfigHolder.COMMON_SPEC)
         }
     }
-    private fun registerContainers(event:RegistryEvent.Register<ContainerType<*>>){
-        LOGGER.info(event.registry.registryName)
-        if(event.registry.registryName.toString() == "minecraft:menu"){
-            BLOCK_LAUNCHER_CONTAINER_TYPE = ContainerType(ItemBlockLauncher.Container.Factory)
-            BLOCK_LAUNCHER_CONTAINER_TYPE.registryName = BLOCK_LAUNCHER_ID
-            event.registry.register(BLOCK_LAUNCHER_CONTAINER_TYPE)
-        }
-    }
-    @OnlyIn(Dist.CLIENT)
-    private fun clientSetup(event:FMLClientSetupEvent){
-        ScreenManager.registerFactory(BLOCK_LAUNCHER_CONTAINER_TYPE, ItemBlockLauncher::Screen)
-    }
-    private fun registerItems(event:RegistryEvent.Register<Item>){
-        LOGGER.info("Registering Items")
-        event.registry.registerAll(ItemBlockLauncher)
-    }
+
 }
