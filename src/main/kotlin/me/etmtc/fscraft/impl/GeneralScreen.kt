@@ -16,30 +16,31 @@ abstract class AbstractEmptyContainerScreen<T : Container>(screenContainer: T, i
         this.blit(i, j, 0, 0, xSize, ySize)
     }
 
+    protected inline fun blitSlot(x: Int, y: Int) = blit(x, y, 176, 0, 18, 18)
     protected fun blitTier(tier: Int, col0: Int, row0: Int) {
         minecraft!!.textureManager.bindTexture(GUI_GENERAL)
         val slot = 18
-        val slotX = 176
-        val slotY = 0
         val row1 = row0 + slot
-        val row2 = row0 + slot * 2
         val col1 = col0 + slot
+        val row2 = row0 + slot * 2
         val col2 = col0 + slot * 2
 
-        blit(col1, row1, slotX, slotY, slot, slot)
+        blitSlot(col1, row1)
         if (tier > 0) {
-            blit(col0, row1, slotX, slotY, slot, slot)
-            blit(col2, row1, slotX, slotY, slot, slot)
+            blitSlot(col0, row1)
+            blitSlot(col2, row1)
 
             if (tier > 1) {
-                blit(col1, row0, slotX, slotY, slot, slot)
-                blit(col1, row2, slotX, slotY, slot, slot)
+
+
+                blitSlot(col1, row0)
+                blitSlot(col1, row2)
 
                 if (tier > 2) {
-                    blit(col0, row0, slotX, slotY, slot, slot)
-                    blit(col0, row2, slotX, slotY, slot, slot)
-                    blit(col2, row0, slotX, slotY, slot, slot)
-                    blit(col2, row2, slotX, slotY, slot, slot)
+                    blitSlot(col0, row0)
+                    blitSlot(col0, row2)
+                    blitSlot(col2, row0)
+                    blitSlot(col2, row2)
                 }
             }
         }

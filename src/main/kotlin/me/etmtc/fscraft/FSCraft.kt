@@ -1,7 +1,7 @@
 package me.etmtc.fscraft
 
 import me.etmtc.fscraft.config.ConfigHolder
-import me.etmtc.fscraft.items.ItemBlockLauncher
+import me.etmtc.fscraft.impl.item.blocklauncher.BlockLauncherContainer
 import net.minecraft.client.gui.ScreenManager
 import net.minecraft.inventory.container.ContainerType
 import net.minecraft.item.Item
@@ -22,9 +22,10 @@ import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runWhenOn
 
 const val MODID = "fscraft"
-val BLOCK_LAUNCHER_ID = ResourceLocation(MODID, "block_launcher")
-val BLOCK_LAUNCHER_TRANSLATION_KEY: String = Util.makeTranslationKey("container", BLOCK_LAUNCHER_ID)
-lateinit var BLOCK_LAUNCHER_CONTAINER_TYPE: ContainerType<ItemBlockLauncher.Container>
+
+val BLOCK_LAUNCHER_CONTAINER_TYPE = ContainerType(BlockLauncherContainer.Factory).also {
+    it.registryName = ResourceLocation("fscraft:block_launcher")
+}
 val LOGGER:Logger = LogManager.getLogger(MODID)
 @Mod(MODID)
 object FSCraft {

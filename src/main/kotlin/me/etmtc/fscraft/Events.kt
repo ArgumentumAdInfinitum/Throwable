@@ -1,8 +1,9 @@
 package me.etmtc.fscraft
 
-import me.etmtc.fscraft.impl.block.SquisherBlock
-import me.etmtc.fscraft.impl.block.SquisherItem
-import me.etmtc.fscraft.items.ItemBlockLauncher
+import me.etmtc.fscraft.impl.block.squisher.SquisherBlock
+import me.etmtc.fscraft.impl.block.squisher.SquisherItem
+import me.etmtc.fscraft.impl.item.blocklauncher.BlockLauncherScreen
+import me.etmtc.fscraft.impl.item.blocklauncher.ItemBlockLauncher
 import net.minecraft.block.Block
 import net.minecraft.client.gui.ScreenManager
 import net.minecraft.client.renderer.RenderType
@@ -31,14 +32,12 @@ internal object Events {
     private fun registerContainers(event: RegistryEvent.Register<ContainerType<*>>){
         LOGGER.info(event.registry.registryName)
         if(event.registry.registryName.toString() == "minecraft:menu"){
-            BLOCK_LAUNCHER_CONTAINER_TYPE = ContainerType(ItemBlockLauncher.Container.Factory)
-            BLOCK_LAUNCHER_CONTAINER_TYPE.registryName = BLOCK_LAUNCHER_ID
             event.registry.register(BLOCK_LAUNCHER_CONTAINER_TYPE)
         }
     }
     @OnlyIn(Dist.CLIENT)
     private fun clientSetup(event: FMLClientSetupEvent){
-        ScreenManager.registerFactory(BLOCK_LAUNCHER_CONTAINER_TYPE, ItemBlockLauncher::Screen)
+        ScreenManager.registerFactory(BLOCK_LAUNCHER_CONTAINER_TYPE, ::BlockLauncherScreen)
         RenderTypeLookup.setRenderLayer(SquisherBlock, RenderType.getCutoutMipped())
     }
 
