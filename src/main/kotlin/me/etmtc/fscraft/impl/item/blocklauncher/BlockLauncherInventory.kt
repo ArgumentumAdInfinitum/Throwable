@@ -17,10 +17,10 @@ class BlockLauncherInventory(nbt: CompoundNBT, val hand: Hand) : IInventory, NBT
         player.getHeldItem(Hand.MAIN_HAND).orCreateTag.getCompound("BlockLauncher").put("LauncherInventory", contentToNBT())
     }
 
-    override fun clear() = items.clear()
+    override fun clear() = items.fill(ItemStack.EMPTY)
     override fun getSizeInventory() = 3
     override fun isEmpty() = items.all(ItemStack::isEmpty)
-    override fun getStackInSlot(index: Int): ItemStack = items[index]
+    override fun getStackInSlot(index: Int): ItemStack = items.getOrNull(index) ?: ItemStack.EMPTY
     override fun decrStackSize(index: Int, count: Int): ItemStack = ItemStackHelper.getAndSplit(items, index, count)
     override fun removeStackFromSlot(index: Int): ItemStack = ItemStackHelper.getAndRemove(items, index)
     override fun setInventorySlotContents(index: Int, stack: ItemStack) {

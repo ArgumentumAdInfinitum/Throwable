@@ -1,7 +1,8 @@
 package me.etmtc.fscraft.impl.item.blocklauncher
 
-import me.etmtc.fscraft.BLOCK_LAUNCHER_CONTAINER_TYPE
+import me.etmtc.fscraft.Registries
 import me.etmtc.fscraft.impl.FSFallingBlockEntity
+import me.etmtc.fscraft.impl.FSGroup
 import me.etmtc.fscraft.maybePut
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -20,7 +21,7 @@ import net.minecraft.util.text.TranslationTextComponent
 import net.minecraft.world.World
 import net.minecraftforge.fml.network.NetworkHooks
 
-object ItemBlockLauncher : Item(Properties().maxStackSize(1)), INamedContainerProvider {
+object BlockLauncherItem : Item(Properties().maxStackSize(1).group(FSGroup)), INamedContainerProvider {
     override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         if (handIn == Hand.MAIN_HAND && !worldIn.isRemote) {
             if (playerIn.isSneaking){
@@ -72,7 +73,7 @@ object ItemBlockLauncher : Item(Properties().maxStackSize(1)), INamedContainerPr
     }
 
     override fun createMenu(i: Int, playerInventory: PlayerInventory, playerEntity: PlayerEntity): net.minecraft.inventory.container.Container? {
-        return BlockLauncherContainer(BLOCK_LAUNCHER_CONTAINER_TYPE, i, playerInventory, getInventory(playerEntity))
+        return BlockLauncherContainer(Registries.blockLauncherContainerType, i, playerInventory, getInventory(playerEntity))
     }
 
     override fun getDisplayName(): ITextComponent = TranslationTextComponent("container.fscraft.block_launcher")

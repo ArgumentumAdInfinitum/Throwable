@@ -1,21 +1,26 @@
 package me.etmtc.fscraft.impl
 
+import me.etmtc.fscraft.GUI_GENERAL
 import net.minecraft.client.gui.screen.inventory.ContainerScreen
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.container.Container
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.text.ITextComponent
 
-val GUI_GENERAL = ResourceLocation("fscraft", "textures/gui/container/general_small.png")
 
-abstract class AbstractEmptyContainerScreen<T : Container>(screenContainer: T, inv: PlayerInventory, titleIn: ITextComponent) : ContainerScreen<T>(screenContainer, inv, titleIn) {
+
+abstract class FSScreen<T : Container>(screenContainer: T, inv: PlayerInventory, titleIn: ITextComponent) : ContainerScreen<T>(screenContainer, inv, titleIn) {
     override fun drawGuiContainerBackgroundLayer(partialTicks: Float, mouseX: Int, mouseY: Int) {
         minecraft!!.textureManager.bindTexture(GUI_GENERAL)
         val i = (width - xSize) / 2
         val j = (height - ySize) / 2
         this.blit(i, j, 0, 0, xSize, ySize)
     }
-
+    override fun render(p_render_1_: Int, p_render_2_: Int, p_render_3_: Float) {
+        this.renderBackground()
+        super.render(p_render_1_, p_render_2_, p_render_3_)
+        this.renderHoveredToolTip(p_render_1_, p_render_2_)
+    }
     protected inline fun blitSlot(x: Int, y: Int) = blit(x, y, 176, 0, 18, 18)
     protected fun blitTier(tier: Int, col0: Int, row0: Int) {
         minecraft!!.textureManager.bindTexture(GUI_GENERAL)

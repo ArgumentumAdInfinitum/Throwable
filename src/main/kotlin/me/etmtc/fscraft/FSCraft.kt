@@ -21,17 +21,11 @@ import thedarkcolour.kotlinforforge.forge.MINECRAFT
 import thedarkcolour.kotlinforforge.forge.MOD_BUS
 import thedarkcolour.kotlinforforge.forge.runWhenOn
 
-const val MODID = "fscraft"
-
-val BLOCK_LAUNCHER_CONTAINER_TYPE = ContainerType(BlockLauncherContainer.Factory).also {
-    it.registryName = ResourceLocation("fscraft:block_launcher")
-}
-val LOGGER:Logger = LogManager.getLogger(MODID)
 @Mod(MODID)
 object FSCraft {
     init {
         Events.registerListeners()
-
+        Registries()
         ModLoadingContext.get().apply {
             registerConfig(ModConfig.Type.SERVER, ConfigHolder.SERVER_SPEC)
             registerConfig(ModConfig.Type.CLIENT, ConfigHolder.CLIENT_SPEC)
