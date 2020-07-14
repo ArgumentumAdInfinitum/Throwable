@@ -20,7 +20,17 @@ import net.minecraft.util.text.ITextComponent
 import net.minecraft.util.text.TranslationTextComponent
 import net.minecraft.world.World
 import net.minecraftforge.fml.network.NetworkHooks
-
+fun Item.getBlockState(player: PlayerEntity? = null):BlockState?{
+    val block = Block.getBlockFromItem(this)
+    return if(block == Blocks.AIR) null else try {
+        @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+        block.getStateForPlacement(BlockItemUseContext(
+                ItemUseContext(player, Hand.MAIN_HAND, RayTrace.nullResult()))
+        ) ?: error("")
+    } catch (t: Throwable){
+        block.defaultState
+    }
+}
 object BlockLauncherItem : Item(Properties().maxStackSize(1).group(FSGroup)), INamedContainerProvider {
     override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         if (handIn == Hand.MAIN_HAND && !worldIn.isRemote) {
@@ -32,30 +42,21 @@ object BlockLauncherItem : Item(Properties().maxStackSize(1).group(FSGroup)), IN
                         .maybePut("BlockLauncher") { CompoundNBT() }
                         .getCompound("LauncherInventory")
                         .getList("Items", 10).also { listTag ->
-                            listTag.firstOrNull()?.let {
-                                if (it is CompoundNBT) {
-                                    val stack = ItemStack.read(it)
+                            listTag.firstOrNull()?.let { tag ->
+                                if (tag is CompoundNBT) {
+                                    val stack = ItemStack.read(tag)
                                     val item = stack.item
                                     if (item != Items.AIR && !stack.isEmpty) {
                                         stack.shrink(1)
-                                        val block = Block.getBlockFromItem(stack.item)
-                                        if(block != Blocks.AIR){
-                                            val state: BlockState = try {
-                                                block.getStateForPlacement(BlockItemUseContext(
-                                                        ItemUseContext(playerIn, Hand.MAIN_HAND, RayTrace.nullResult()))
-                                                ) ?: error("")
-                                            } catch (t:Throwable){
-                                                block.defaultState
-                                            }
+                                        stack.item.getBlockState(playerIn)?.let {
                                             val vec = playerIn.positionVec
-                                            val fbe = FSFallingBlockEntity(worldIn, vec.x, vec.y + 1.62, vec.z, state)
+                                            val fbe = FSFallingBlockEntity(worldIn, vec.x, vec.y + 1.62, vec.z, it)
                                             fbe.motion = playerIn.lookVec.mul(2.0, 2.0, 2.0)
                                             worldIn.addEntity(fbe)
                                         }
-
                                         if (stack.isEmpty)
-                                            listTag.remove(it)
-                                        else stack.write(it)
+                                            listTag.remove(tag)
+                                        else stack.write(tag)
                                     }
                                 }
                             }

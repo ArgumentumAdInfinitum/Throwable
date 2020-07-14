@@ -1,25 +1,19 @@
 package me.etmtc.fscraft.impl.block.compressor
 
-import me.etmtc.fscraft.FSContainer
 import me.etmtc.fscraft.Registries
-import net.minecraft.block.NoteBlock
-import net.minecraft.entity.item.ItemEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.player.PlayerInventory
 import net.minecraft.inventory.IInventory
-import net.minecraft.inventory.Inventory
+import net.minecraft.inventory.ISidedInventory
 import net.minecraft.inventory.ItemStackHelper
-import net.minecraft.inventory.container.ContainerType
 import net.minecraft.inventory.container.INamedContainerProvider
-import net.minecraft.inventory.container.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.CompoundNBT
-import net.minecraft.network.PacketBuffer
 import net.minecraft.tileentity.TileEntity
+import net.minecraft.util.Direction
 import net.minecraft.util.text.TranslationTextComponent
-import net.minecraftforge.fml.network.IContainerFactory
 
-class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), INamedContainerProvider, IInventory {
+class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), INamedContainerProvider, IInventory, ISidedInventory  {
     // IInventory
     private val contents = MutableList(2) { ItemStack.EMPTY }
     override fun clear() = contents.fill(ItemStack.EMPTY)
@@ -34,9 +28,21 @@ class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), IN
     override fun markDirty() = super.markDirty()
     override fun isUsableByPlayer(player: PlayerEntity) = true
 
+    // ISidedInventory
+    override fun canExtractItem(index: Int, stack: ItemStack, direction: Direction): Boolean = index == 1
+    override fun canInsertItem(index: Int, itemStackIn: ItemStack, direction: Direction?): Boolean = index == 0
+    override fun getSlotsForFace(side: Direction) = when(side){
+        Direction.UP -> intArrayOf(0)
+        else -> intArrayOf(1)
+    }
+
     // INamedContainerProvider
-    override fun createMenu(windowId: Int, inv: PlayerInventory, p_createMenu_3_: PlayerEntity) = CompressorContainer(Registries.compressorContainerType, windowId, inv,this)
+    override fun createMenu(windowId: Int, inv: PlayerInventory, p_createMenu_3_: PlayerEntity) = CompressorContainer(Registries.compressorContainerType, windowId, inv, this)
     override fun getDisplayName() = TranslationTextComponent("container.fscraft.compressor")
+
+    // IContainerListener
+
+
 
     // TileEntity
     override fun write(compound: CompoundNBT): CompoundNBT {
@@ -53,7 +59,6 @@ class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), IN
     fun compress(){
         // TODO update to mini-block version
         if(contents[0].isEmpty) return
-        contents[0].shrink(1)
         when {
             contents[0].isItemEqual(contents[1]) -> {
                 contents[1].grow(1)
@@ -65,6 +70,7 @@ class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), IN
             }
             else -> return
         }
+        contents[0].shrink(1)
         markDirty()
     }
 

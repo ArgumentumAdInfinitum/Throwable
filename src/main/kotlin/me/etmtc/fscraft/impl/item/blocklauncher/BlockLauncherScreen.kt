@@ -13,5 +13,6 @@ class BlockLauncherScreen(screenContainer: BlockLauncherContainer, inv: PlayerIn
         val i = (width - xSize) / 2 + 61
         val j = (height - ySize) / 2 + 16
         blitTier(tier, i, j)
+
     }
 }
