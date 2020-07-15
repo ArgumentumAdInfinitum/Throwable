@@ -36,7 +36,7 @@ repositories {
 
 group = 'me.etm'
 version = '1.0-SNAPSHOT'
-archivesBaseName = 'fscraft'
+archivesBaseName = 'throwable'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
@@ -95,7 +95,7 @@ minecraft {
             // Recommended logging level for the console
             property 'forge.logging.console.level', 'debug'
 
-            args '--mod', 'fscraft', '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'throwable', '--all', '--output', file('src/generated/resources/')
 
             mods {
                 jscraft {
