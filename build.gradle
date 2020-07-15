@@ -126,21 +126,19 @@ dependencies {
 
     // These dependencies get remapped to your current MCP mappings
     // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
-    // at runtime, use the full JEI jar
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 compileKotlin {
-    // Needed if you use Forge.kt
-    // and Kotlin 1.4 language features
     kotlinOptions {
         jvmTarget = "1.8"
         languageVersion = '1.4'
         apiVersion = '1.4'
+        freeCompilerArgs += '-Xopt-in=kotlin.RequiresOptIn'
     }
 }
 jar.finalizedBy('reobfJar')

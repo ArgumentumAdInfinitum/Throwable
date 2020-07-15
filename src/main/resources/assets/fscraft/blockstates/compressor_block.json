@@ -1,6 +1,0 @@
-{
-  "variants": {
-    "powered=false": { "model": "fscraft:block/compressor_resting" },
-    "powered=true": {"model": "fscraft:block/compressor_powered"}
-  }
-}

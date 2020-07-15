@@ -1,0 +1,7 @@
+{
+  "gui.throwable.compressor.title": "Compressor",
+  "block.throwable.compressor_block": "Compressor",
+  "item.throwable.compressor": "Compressor",
+  "item.throwable.throwable": "Throwable Block",
+  "itemGroup.throwableGroup": "Throwable Mod Items"
+}

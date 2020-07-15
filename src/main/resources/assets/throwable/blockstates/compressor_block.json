@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "powered=false": { "model": "throwable:block/compressor_resting" },
+    "powered=true": {"model": "throwable:block/compressor_powered"}
+  }
+}

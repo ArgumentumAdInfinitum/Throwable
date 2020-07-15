@@ -1,0 +1,7 @@
+{
+  "gui.throwable.compressor.title": "压缩机",
+  "block.throwable.compressor_block": "压缩机",
+  "item.throwable.compressor": "压缩机",
+  "item.throwable.throwable": "可投掷方块",
+  "itemGroup.throwableGroup": "投掷物"
+}
