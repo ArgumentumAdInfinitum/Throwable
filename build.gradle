@@ -64,7 +64,7 @@ minecraft {
             property 'forge.logging.console.level', 'info'
 
             mods {
-                jscraft {
+                throwable {
                     source sourceSets.main
                 }
             }
@@ -80,7 +80,7 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             mods {
-                jscraft {
+                throwable {
                     source sourceSets.main
                 }
             }
