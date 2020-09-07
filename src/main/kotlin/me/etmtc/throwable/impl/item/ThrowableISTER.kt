@@ -22,7 +22,7 @@ object ThrowableISTER : ItemStackTileEntityRenderer() {
                 THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, FIRST_PERSON_LEFT_HAND, FIRST_PERSON_RIGHT_HAND -> {
                     if (itemStackIn.orCreateTag.getBoolean("using")) {
                         translate(0.5, 0.2, 0.0)
-                        scale(0.35f,0.35f,0.35f)
+                        scale(0.35f, 0.35f, 0.35f)
                     } else {
                         translate(0.0, 0.4, 0.5)
                         scale(0.4f, 0.4f, 0.4f)

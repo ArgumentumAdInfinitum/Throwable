@@ -20,7 +20,7 @@ class CommonConfig(builder: ForgeConfigSpec.Builder) {
                         comment = arrayOf("should use modified fallingblock tick system instead of vanilla.", "If enabled, concrete powder will not work.")
                     }
                     val dependsModTick = "If 'useModTick' is set to false, this config value has no effect."
-                    dropTicks = configure("dropTicks", 400, 0, 2000) {
+                    dropTicks = configure("dropTicks", 40, 0, 2000) {
                         comment = arrayOf("how many ticks(20t = 1s) should a falling block wait before dropping as an item.", dependsModTick)
                     }
                     shouldLookup = configure("shouldLookup", true) {

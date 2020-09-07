@@ -15,7 +15,7 @@ import net.minecraft.tileentity.TileEntity
 import net.minecraft.util.Direction
 import net.minecraft.util.text.TranslationTextComponent
 
-class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), INamedContainerProvider, IInventory, ISidedInventory  {
+class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), INamedContainerProvider, IInventory, ISidedInventory {
     // IInventory
     private val contents = MutableList(2) { ItemStack.EMPTY }
     override fun clear() = contents.fill(ItemStack.EMPTY)
@@ -24,16 +24,17 @@ class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), IN
     override fun getSizeInventory() = 2
     override fun decrStackSize(index: Int, count: Int): ItemStack = ItemStackHelper.getAndSplit(contents, index, count)
     override fun removeStackFromSlot(index: Int): ItemStack = ItemStackHelper.getAndRemove(contents, index)
-    override fun setInventorySlotContents(index: Int, stack: ItemStack){
+    override fun setInventorySlotContents(index: Int, stack: ItemStack) {
         contents[index] = stack
     }
+
     override fun markDirty() = super.markDirty()
     override fun isUsableByPlayer(player: PlayerEntity) = true
 
     // ISidedInventory
     override fun canExtractItem(index: Int, stack: ItemStack, direction: Direction): Boolean = index == 1
     override fun canInsertItem(index: Int, itemStackIn: ItemStack, direction: Direction?): Boolean = index == 0
-    override fun getSlotsForFace(side: Direction) = when(side){
+    override fun getSlotsForFace(side: Direction) = when (side) {
         Direction.UP -> intArrayOf(0)
         else -> intArrayOf(1)
     }
@@ -45,22 +46,22 @@ class CompressorTileEntity : TileEntity(Registries.compressorTileEntityType), IN
     // IContainerListener
 
 
-
     // TileEntity
     override fun write(compound: CompoundNBT): CompoundNBT {
         compound.put("Input", contents[0].write(CompoundNBT()))
         compound.put("Output", contents[1].write(CompoundNBT()))
         return super.write(compound)
     }
+
     override fun read(compound: CompoundNBT) {
         contents[0] = ItemStack.read(compound.getCompound("Input"))
         contents[1] = ItemStack.read(compound.getCompound("Output"))
         super.read(compound)
     }
 
-    fun compress(){
+    fun compress() {
         // TODO update to mini-block version
-        if(contents[0].isEmpty) return
+        if (contents[0].isEmpty) return
         when {
             contents[1].isEmpty -> {
                 contents[1] = ItemStack(ThrowableBlockItem).also {

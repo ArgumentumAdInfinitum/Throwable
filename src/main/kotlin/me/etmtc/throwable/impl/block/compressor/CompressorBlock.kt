@@ -81,7 +81,7 @@ object CompressorBlock : Block(Properties.create(Material.ROCK).notSolid().hardn
             (worldIn.getTileEntity(pos) as? CompressorTileEntity)
                     ?.getStackInSlot(1)
                     ?.let { Container.calcRedstoneFromInventory(Inventory(it)) }
-            ?: 0
+                    ?: 0
 
     private val shape: VoxelShape
     private val shapeExtended: VoxelShape

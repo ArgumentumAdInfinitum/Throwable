@@ -33,25 +33,27 @@ fun Entity.shoot(shooter: Entity, pitch: Float, yaw: Float, velocity: Float, ina
     this.motion = this.motion.add(shooter.motion.x, if (shooter.onGround) 0.0 else shooter.motion.y, shooter.motion.z)
 }
 
-object ThrowableBlockItem : Item(Properties().setISTER { Callable { ThrowableISTER } }){
+object ThrowableBlockItem : Item(Properties().setISTER { Callable { ThrowableISTER } }) {
     override fun onItemRightClick(worldIn: World, playerIn: PlayerEntity, handIn: Hand): ActionResult<ItemStack> {
         playerIn.activeHand = handIn
         return ActionResult.resultConsume(playerIn.getHeldItem(handIn))
     }
+
     override fun getUseDuration(stack: ItemStack) = 72000
     override fun getUseAction(stack: ItemStack) = UseAction.BOW
     override fun onUse(worldIn: World, livingEntityIn: LivingEntity, stack: ItemStack, count: Int) {
         stack.orCreateTag.putBoolean("using", true)
     }
+
     override fun onPlayerStoppedUsing(stack: ItemStack, worldIn: World, entity: LivingEntity, timeLeft: Int) {
         stack.orCreateTag.putBoolean("using", false)
-        if(entity is PlayerEntity){
+        if (entity is PlayerEntity) {
             val f = BowItem.getArrowVelocity(getUseDuration(stack) - timeLeft)
-            if(f >= 0.1 && !worldIn.isRemote){
+            if (f >= 0.1 && !worldIn.isRemote) {
                 stack.getBlockStateNBT(entity)?.let {
-                    val e = CustomFallingBlockEntity(worldIn,entity.posX, entity.posY, entity.posZ, it)
-                    e.shoot(entity, entity.rotationPitch, entity.rotationYaw,f*3f, 0.5f)
-                    if(!entity.abilities.isCreativeMode)
+                    val e = CustomFallingBlockEntity(worldIn, entity.posX, entity.posY, entity.posZ, it)
+                    e.shoot(entity, entity.rotationPitch, entity.rotationYaw, f * 3f, 0.5f)
+                    if (!entity.abilities.isCreativeMode)
                         stack.shrink(1)
                     entity.addStat(Stats.ITEM_USED[this])
                     worldIn.addEntity(e)
@@ -62,14 +64,16 @@ object ThrowableBlockItem : Item(Properties().setISTER { Callable { ThrowableIST
         }
 
     }
+
     @Suppress("NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
     private fun Block.getBlockState(playerEntity: PlayerEntity?) = try {
         getStateForPlacement(BlockItemUseContext(ItemUseContext(playerEntity, Hand.MAIN_HAND, null)))
-    } catch(t: Throwable){
+    } catch (t: Throwable) {
         defaultState
     }
+
     fun ItemStack.getBlockStateNBT(playerEntity: PlayerEntity? = null): BlockState? =
-        ForgeRegistries.BLOCKS.getValue(ResourceLocation(orCreateTag.getString("block")))?.getBlockState(playerEntity)
+            ForgeRegistries.BLOCKS.getValue(ResourceLocation(orCreateTag.getString("block")))?.getBlockState(playerEntity)
 
 
 }

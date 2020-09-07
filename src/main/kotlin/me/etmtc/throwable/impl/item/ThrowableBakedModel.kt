@@ -12,8 +12,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite
 import net.minecraft.util.Direction
 import java.util.*
 
-var perspective : ItemCameraTransforms.TransformType? = null
-class ThrowableBakedModel(private val existing: IBakedModel): IBakedModel {
+var perspective: ItemCameraTransforms.TransformType? = null
+
+class ThrowableBakedModel(private val existing: IBakedModel) : IBakedModel {
     override fun getQuads(state: BlockState?, side: Direction?, rand: Random): MutableList<BakedQuad> = existing.getQuads(state, side, rand)
     override fun isAmbientOcclusion() = existing.isAmbientOcclusion
     override fun getParticleTexture(): TextureAtlasSprite = existing.particleTexture

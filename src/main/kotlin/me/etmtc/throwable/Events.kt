@@ -20,21 +20,21 @@ import thedarkcolour.kotlinforforge.forge.runWhenOn
 
 @Suppress("UNUSED_PARAMETER")
 internal object Events {
-    fun registerListeners(){
-        runWhenOn(Dist.CLIENT){
+    fun registerListeners() {
+        runWhenOn(Dist.CLIENT) {
             MOD_BUS.addListener(::clientSetup)
             MOD_BUS.addListener(::onModelBaked)
         }
     }
 
     @OnlyIn(Dist.CLIENT)
-    private fun clientSetup(event: FMLClientSetupEvent){
+    private fun clientSetup(event: FMLClientSetupEvent) {
         ScreenManager.registerFactory(Registries.compressorContainerType, ::CompressorScreen)
         ClientRegistry.bindTileEntityRenderer(Registries.compressorTileEntityType, ::CompressorTER)
         RenderTypeLookup.setRenderLayer(CompressorBlock, RenderType.getCutoutMipped())
     }
 
-    private fun onModelBaked(event: ModelBakeEvent){
+    private fun onModelBaked(event: ModelBakeEvent) {
         val modelRegistry = event.modelRegistry
         val location = ModelResourceLocation(ThrowableBlockItem.getRegistryName(), "inventory")
         when (val existingModel = modelRegistry[location]) {
